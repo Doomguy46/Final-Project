@@ -17,8 +17,23 @@ class WordProcessor:
         self.recording = None
         self.recordingAmount = 0
         self.is_recording = False
-        self.text_area = tk.Text(self.root, wrap='word', undo=True)
-        self.text_area.pack(fill='both', expand=1)
+        # Main container frame
+        main_frame = tk.Frame(self.root)
+        main_frame.pack(fill='both', expand=True)
+
+        # Toolbar frame
+        self.toolbar = tk.Frame(main_frame)
+        self.toolbar.pack(fill='x')
+
+        # Text area
+        self.text_area = tk.Text(main_frame, wrap='word', undo=True)
+        self.text_area.pack(fill='both', expand=True)
+
+        # Scrollbar
+        self.scroll = tk.Scrollbar(self.text_area)
+        self.scroll.pack(side='right', fill='y')
+        self.scroll.config(command=self.text_area.yview)
+        self.text_area.config(yscrollcommand=self.scroll.set)
 
         self.scroll = tk.Scrollbar(self.text_area)
         self.scroll.pack(side='right', fill='y')
@@ -143,7 +158,7 @@ class WordProcessor:
 
 
     def _create_toolbar(self):
-        toolbar = tk.Frame(self.root)
+        toolbar = self.toolbar
 
         font_families = list(font.families())
         self.font_var = tk.StringVar(value="Arial")
@@ -154,9 +169,22 @@ class WordProcessor:
         self.size_menu = tk.Spinbox(toolbar, from_=8, to=72, textvariable=self.size_var, command=self._change_font)
         self.size_menu.pack(side='left')
 
+        # Header Button
+        header_btn = tk.Button(toolbar, text="Header", command=self._apply_header)
+        header_btn.pack(side='left')
+
+        # Subheader Button
+        subheader_btn = tk.Button(toolbar, text="Subheader", command=self._apply_subheader)
+        subheader_btn.pack(side='left')
+
+        # Bullet List Button
+        bullet_btn = tk.Button(toolbar, text="• Bullet", command=self._apply_bullet)
+        bullet_btn.pack(side='left')
+
         toolbar.pack(fill='x')
 
-        self._change_font()  # Set initial font
+        # Set initial font
+        self._change_font()
 
     def _change_font(self, *args):
         selected_font = self.font_var.get()
@@ -173,13 +201,40 @@ class WordProcessor:
         path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
         if path:
             try:
-                with open(path, "r") as file:
+                with open(path, "r", encoding="utf-8") as file:
                     content = file.read()
                 self.text_area.delete(1.0, tk.END)
                 self.text_area.insert(tk.END, content)
             except Exception as e:
                 messagebox.showerror("Error", f"Could not open file: {e}")
+    def _apply_header(self):
+        try:
+            self.text_area.tag_add("header", "sel.first", "sel.last")
+            self.text_area.tag_config("header", font=(self.font_var.get(), 20, "bold"))
+        except tk.TclError:
+            messagebox.showwarning("Selection Error", "Please select text to format as Header.")
 
+    def _apply_subheader(self):
+        try:
+            self.text_area.tag_add("subheader", "sel.first", "sel.last")
+            self.text_area.tag_config("subheader", font=(self.font_var.get(), 16, "bold"))
+        except tk.TclError:
+            messagebox.showwarning("Selection Error", "Please select text to format as Subheader.")
+
+    def _apply_bullet(self):
+        try:
+            # Get selected lines
+            start = self.text_area.index("sel.first linestart")
+            end = self.text_area.index("sel.last lineend")
+            lines = self.text_area.get(start, end).splitlines()
+
+            # Replace each line with bullet
+            bulleted = "\n".join(f"• {line}" if not line.strip().startswith("•") else line for line in lines)
+
+            self.text_area.delete(start, end)
+            self.text_area.insert(start, bulleted)
+        except tk.TclError:
+            messagebox.showwarning("Selection Error", "Please select lines to convert to bullet list.")
     def _save_file(self):
         if self.default_path:
             path = filedialog.asksaveasfilename(initialfile=os.path.basename(self.default_path),initialdir=os.path.dirname(self.default_path), defaultextension=".txt",filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
@@ -188,7 +243,7 @@ class WordProcessor:
         if path:
             try:
                 content = self.text_area.get(1.0, tk.END)
-                with open(path, "w") as file:
+                with open(path, "w",  encoding="utf-8") as file:
                     file.write(content)
                     self.default_path = path  # Update default path
             except Exception as e:
