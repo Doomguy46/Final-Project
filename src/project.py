@@ -70,7 +70,7 @@ class WordProcessor:
             if self.is_recording:
                 self.recording.append(indata.copy())
 
-        self.stream = sd.InputStream(samplerate=self.fs, channels=2, callback=callback)
+        self.stream = sd.InputStream(samplerate=self.fs, channels=sd.default.channels, callback=callback)
         self.stream.start()
         messagebox.showinfo("Recording", "Recording started...")
 
@@ -118,11 +118,12 @@ class WordProcessor:
             audio_var.set(audio_options[0]) # Default value
             audio_dropdown = tk.OptionMenu(settings_window, audio_var, *audio_options)
             audio_dropdown.pack()
-            save_button = tk.Button(settings_window, text="Save", command=lambda: self.save_settings(audio_var.get(),indevices))
+            save_button = tk.Button(settings_window, text="Save", command = lambda: self.save_settings(audio_var.get()))
             save_button.pack()
 
-    def save_settings(selectedDevice):
+    def save_settings(self, selectedDevice):
         sd.default.device = selectedDevice
+        messagebox.showinfo("Settings Saved!", "Settings Saved")
                
 
 
