@@ -52,9 +52,12 @@ class WordProcessor:
         edit_menu.add_command(label="Cut", command=lambda: self.text_area.event_generate("<<Cut>>"))
         edit_menu.add_command(label="Copy", command=lambda: self.text_area.event_generate("<<Copy>>"))
         edit_menu.add_command(label="Paste", command=lambda: self.text_area.event_generate("<<Paste>>"))
+        menu_bar.add_command(label= "Settings", command = self._open_settings)
         menu_bar.add_cascade(label="Edit", menu=edit_menu)
 
         self.root.config(menu=menu_bar)
+    def _open_settings(self):
+        exit
     def _start_record(self):
         exit
     def _end_record(self):
