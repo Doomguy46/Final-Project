@@ -117,20 +117,27 @@ class WordProcessor:
             audio_var = tk.StringVar(settings_window)
             i = 0
             print(sd.default.device)
-            for device in sd.query_devices:
-                if sd.query_devices[i]["index"] == sd.default.device[0]:
+            for device in sd.query_devices():
+                if device["index"] == 0:
+                    i = 0
+                if device["index"] == sd.default.device[0]:
                     break
                 i += 1
             print(i)
             
-            audio_var.set(audio_options[i-1])
+            audio_var.set(audio_options[i])
             audio_dropdown = tk.OptionMenu(settings_window, audio_var, *audio_options)
             audio_dropdown.pack()
-            save_button = tk.Button(settings_window, text="Save", command = lambda: self.save_settings(audio_var.get()))
+            save_button = tk.Button(settings_window, text="Save", command = lambda: self.save_settings(audio_var.get(), indevices))
             save_button.pack()
 
-    def save_settings(self, selectedDevice):
-        sd.default.device = selectedDevice
+    def save_settings(self, selectedDevice, indevices):
+        for device in indevices:
+            if device["name"] == selectedDevice:
+                sd.default.device = device["index"]
+                print(device["index"])
+                break
+        
         messagebox.showinfo("Settings Saved!", "Settings Saved")
                
 
