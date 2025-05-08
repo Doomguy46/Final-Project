@@ -1,7 +1,11 @@
 import tkinter as tk
 from tkinter import filedialog, font, messagebox
+import sounddevice as sd
+from scipy.io.wavfile import write
+import os
 
 class WordProcessor:
+    
     def __init__(self, root):
         self.root = root
         self.root.title("Basic Word Processor")
@@ -14,13 +18,20 @@ class WordProcessor:
         self.scroll.pack(side='right', fill='y')
         self.scroll.config(command=self.text_area.yview)
         self.text_area.config(yscrollcommand=self.scroll.set)
+        drive = tk.simpledialog.askstring("Drive Letter?", "Drive letter?")
+        if drive:
+            drive = drive.upper()
+            self.default_path = f"{drive}:/notes/default_note.txt"
+            os.makedirs(os.path.dirname(self.default_path), exist_ok=True)
+        else:
+            self.default_path = None
 
         self._create_menu()
         self._create_toolbar()
 
     def _create_menu(self):
         menu_bar = tk.Menu(self.root)
-
+        
         file_menu = tk.Menu(menu_bar, tearoff=0)
         file_menu.add_command(label="New", command=self._new_file)
         file_menu.add_command(label="Open", command=self._open_file)
@@ -28,7 +39,8 @@ class WordProcessor:
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.root.quit)
         menu_bar.add_cascade(label="File", menu=file_menu)
-
+        record_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label = "Record", menu = record_menu)
         edit_menu = tk.Menu(menu_bar, tearoff=0)
         edit_menu.add_command(label="Cut", command=lambda: self.text_area.event_generate("<<Cut>>"))
         edit_menu.add_command(label="Copy", command=lambda: self.text_area.event_generate("<<Copy>>"))
@@ -36,6 +48,10 @@ class WordProcessor:
         menu_bar.add_cascade(label="Edit", menu=edit_menu)
 
         self.root.config(menu=menu_bar)
+    def _start_record(self):
+        exit
+    def _end_record(self):
+        exit
 
     def _create_toolbar(self):
         toolbar = tk.Frame(self.root)
@@ -76,16 +92,18 @@ class WordProcessor:
                 messagebox.showerror("Error", f"Could not open file: {e}")
 
     def _save_file(self):
-        path = filedialog.asksaveasfilename(defaultextension=".txt",
-                                             filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+        if self.default_path:
+            path = filedialog.asksaveasfilename(initialfile=os.path.basename(self.default_path),initialdir=os.path.dirname(self.default_path), defaultextension=".txt",filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+        else:
+            path = filedialog.asksaveasfilename(defaultextension=".txt",filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
         if path:
             try:
                 content = self.text_area.get(1.0, tk.END)
                 with open(path, "w") as file:
                     file.write(content)
+                    self.default_path = path  # Update default path
             except Exception as e:
                 messagebox.showerror("Error", f"Could not save file: {e}")
-
 def main():
     root = tk.Tk()
     app = WordProcessor(root)
