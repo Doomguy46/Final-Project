@@ -45,6 +45,8 @@ class WordProcessor:
         file_menu.add_command(label="Exit", command=self.root.quit)
         menu_bar.add_cascade(label="File", menu=file_menu)
         record_menu = tk.Menu(menu_bar, tearoff=0)
+        record_menu.add_command(label="Record Audio", command = self._start_record)
+        record_menu.add_command(label ="End Recording", command = self._end_record)
         menu_bar.add_cascade(label = "Record", menu = record_menu)
         edit_menu = tk.Menu(menu_bar, tearoff=0)
         edit_menu.add_command(label="Cut", command=lambda: self.text_area.event_generate("<<Cut>>"))
