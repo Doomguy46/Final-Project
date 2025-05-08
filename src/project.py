@@ -4,6 +4,8 @@ import sounddevice as sd
 from scipy.io.wavfile import write
 import os
 import datetime
+import numpy as np
+import threading
 
 class WordProcessor:
     
@@ -11,7 +13,10 @@ class WordProcessor:
         self.root = root
         self.root.title("Basic Word Processor")
         self.root.geometry("1920x1080")
-
+        self.fs = 44100  # Sample rate
+        self.recording = None
+        self.recordingAmount = 0
+        self.is_recording = False
         self.text_area = tk.Text(self.root, wrap='word', undo=True)
         self.text_area.pack(fill='both', expand=1)
 
@@ -56,11 +61,41 @@ class WordProcessor:
         menu_bar.add_cascade(label="Edit", menu=edit_menu)
 
         self.root.config(menu=menu_bar)
-    def _open_settings(self):
-        exit
     def _start_record(self):
-        exit
+        if not self.is_recording:
+            self.is_recording = True
+            self.recording = []
+
+        def callback(indata, frames, time, status):
+            if self.is_recording:
+                self.recording.append(indata.copy())
+
+        self.stream = sd.InputStream(samplerate=self.fs, channels=2, callback=callback)
+        self.stream.start()
+        messagebox.showinfo("Recording", "Recording started...")
+
     def _end_record(self):
+        if self.is_recording:
+          self.is_recording = False
+          self.stream.stop()
+          self.stream.close()
+
+        
+        audio_data = np.concatenate(self.recording, axis=0)
+
+        if self.default_path:
+            base_path = os.path.dirname(self.default_path)
+            audio_path = os.path.join(base_path, f"recording{self.recordingAmount}.wav")
+            self.recordingAmount = self.recordingAmount + 1
+        else:
+            audio_path = filedialog.asksaveasfilename(defaultextension=".wav", filetypes=[("WAV files", "*.wav")])
+
+        try:
+            write(audio_path, self.fs, audio_data)
+            messagebox.showinfo("Saved", f"Audio saved at:\n{audio_path}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not save recording: {e}")
+    def _open_settings(self):
         exit
 
     def _create_toolbar(self):
