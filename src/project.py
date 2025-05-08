@@ -96,7 +96,35 @@ class WordProcessor:
         except Exception as e:
             messagebox.showerror("Error", f"Could not save recording: {e}")
     def _open_settings(self):
-        exit
+            settings_window = tk.Toplevel()
+            settings_window.title("Settings")
+
+            # Example settings options
+            audio_label = tk.Label(settings_window, text="Audio Input Device:")
+            audio_label.pack()
+            indeviceNames = []
+            indevices = []
+            outdevicename = []
+            outdevices = []
+            for device in sd.query_devices():
+                if device["max_input_channels"] > 0:
+                    indeviceNames.append(device["name"])
+                    indevices.append(device)
+                elif device["max_output_channels"] > 0:
+                    outdevicename.append(device["name"])
+                    outdevices.append(device)
+            audio_options = indeviceNames
+            audio_var = tk.StringVar(settings_window)
+            audio_var.set(audio_options[0]) # Default value
+            audio_dropdown = tk.OptionMenu(settings_window, audio_var, *audio_options)
+            audio_dropdown.pack()
+            save_button = tk.Button(settings_window, text="Save", command=lambda: self.save_settings(audio_var.get(),indevices))
+            save_button.pack()
+
+    def save_settings(selectedDevice):
+        sd.default.device = selectedDevice
+               
+
 
     def _create_toolbar(self):
         toolbar = tk.Frame(self.root)
