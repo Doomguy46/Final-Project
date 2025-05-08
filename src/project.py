@@ -24,9 +24,9 @@ class WordProcessor:
         if drive:
             drive = drive.upper()
             if clas:
-                self.default_path = f"{drive}:/{datetime.datetime.now().strftime("%Y-%m-%d")}_Notes/{clas}/default_note.txt"
+                self.default_path = f"{drive}:/Notes/{datetime.datetime.now().strftime("%Y-%m-%d")}_Notes/{clas}/default_note.txt"
             else:
-                self.default_path = f"{drive}:/{datetime.datetime.now().strftime("%Y-%m-%d")}_Notes/default_note.txt"
+                self.default_path = f"{drive}:/Notes/{datetime.datetime.now().strftime("%Y-%m-%d")}_Notes/default_note.txt"
             os.makedirs(os.path.dirname(self.default_path), exist_ok=True)
         else:
             self.default_path = None
