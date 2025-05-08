@@ -3,13 +3,14 @@ from tkinter import filedialog, font, messagebox
 import sounddevice as sd
 from scipy.io.wavfile import write
 import os
+import datetime
 
 class WordProcessor:
     
     def __init__(self, root):
         self.root = root
         self.root.title("Basic Word Processor")
-        self.root.geometry("800x600")
+        self.root.geometry("1920x1080")
 
         self.text_area = tk.Text(self.root, wrap='word', undo=True)
         self.text_area.pack(fill='both', expand=1)
@@ -19,9 +20,13 @@ class WordProcessor:
         self.scroll.config(command=self.text_area.yview)
         self.text_area.config(yscrollcommand=self.scroll.set)
         drive = tk.simpledialog.askstring("Drive Letter?", "Drive letter?")
+        clas = tk.simpledialog.askstring("Class?", "Enter Class Name")
         if drive:
             drive = drive.upper()
-            self.default_path = f"{drive}:/notes/default_note.txt"
+            if clas:
+                self.default_path = f"{drive}:/{datetime.datetime.now().strftime("%Y-%m-%d")}_Notes/{clas}/default_note.txt"
+            else:
+                self.default_path = f"{drive}:/{datetime.datetime.now().strftime("%Y-%m-%d")}_Notes/default_note.txt"
             os.makedirs(os.path.dirname(self.default_path), exist_ok=True)
         else:
             self.default_path = None
