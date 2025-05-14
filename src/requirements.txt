@@ -1,0 +1,4 @@
+tkinter
+sounddevice
+scipy
+numpy
