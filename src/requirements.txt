@@ -1,4 +1,3 @@
-tkinter
 sounddevice
 scipy
 numpy
